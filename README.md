@@ -28,6 +28,9 @@
 
 ### 🤖 **Multi-Agent Architecture**
 - **Parser Agent**: Docling-based PDF parsing with advanced table extraction
+  - Intelligently handles both text and tables
+  - Preserves table structure and converts to HTML/PNG formats
+  - Ensures tables are properly integrated into the extraction context
 - **Subfield Detection Agent**: Identifies paper type (experimental/computational/ML) and tailors extraction prompts
 - **Extraction Agent**: GPT-5 powered structured data extraction using TrustCall
 - **Evaluation Agent**: Iterative quality assessment with confidence scoring (up to 3 cycles)
@@ -407,6 +410,19 @@ Flagged for review: 23
 Total compositions: 2,341
 ```
 
+### LangSmith Tracing
+
+KnowMat integrates with LangSmith for comprehensive debugging and tracing of all LLM decisions.
+
+With tracing enabled, you can:
+- View every LLM call and response in the LangSmith dashboard
+- Debug extraction decisions and prompt effectiveness
+- Analyze confidence scoring rationale
+- Trace multi-agent interactions through the entire pipeline
+- Monitor token usage and costs per paper
+
+Access your traces at: https://smith.langchain.com/
+
 ---
 
 ## Model Selection and Cost Optimization
@@ -472,18 +488,6 @@ Warning: All runs flagged for review
 Warning: Property standardization failed
 ```
 **Solution**: Ensure `src/knowmat/properties.json` exists and is valid JSON.
-
-### Debug Mode
-
-Enable verbose LangSmith tracing:
-
-```bash
-export LANGCHAIN_TRACING_V2=true
-export LANGCHAIN_PROJECT=KnowMat2
-```
-
-Then check traces at: https://smith.langchain.com/
-
 
 ---
 

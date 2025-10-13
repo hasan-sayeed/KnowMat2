@@ -69,66 +69,7 @@
 
 ---
 
-## Architecture
-
-### Pipeline Flow
-
-```
-PDF Input
-   ↓
-┌─────────────────────────────────────────────┐
-│ 1. Parser Agent (Docling)                  │
-│    - Extract text, tables, structure       │
-│    - Remove references/citations            │
-└─────────────────────────────────────────────┘
-   ↓
-┌─────────────────────────────────────────────┐
-│ 2. Subfield Detection Agent (GPT-5-mini)   │
-│    - Classify paper type                    │
-│    - Generate tailored extraction prompt    │
-└─────────────────────────────────────────────┘
-   ↓
-┌─────────────────────────────────────────────┐
-│ 3-5. Extraction/Evaluation Loop (≤3 cycles) │
-│    Extraction Agent (GPT-5 + TrustCall):    │
-│      - Extract structured data              │
-│    Evaluation Agent (GPT-5):                │
-│      - Assess accuracy vs. source text      │
-│      - Assign confidence score              │
-│      - Suggest prompt refinements           │
-│    (Repeat extraction if confidence < threshold)│
-│    (Maximum 3 cycles)                       │
-└─────────────────────────────────────────────┘
-   ↓
-┌─────────────────────────────────────────────┐
-│ 6. Two-Stage Manager                        │
-│    Stage 1 - Aggregation (Rule-Based):      │
-│      - Merge 3 extraction runs              │
-│      - Select best compositions             │
-│      - Deduplicate properties               │
-│    Stage 2 - Validation (GPT-5):            │
-│      - Detect hallucinations                │
-│      - Correct using evaluation feedback    │
-│      - Validate ML-ready format             │
-│      - Generate review guide                │
-└─────────────────────────────────────────────┘
-   ↓
-┌─────────────────────────────────────────────┐
-│ 7. Property Standardization (GPT-5-mini)    │
-│    - Map properties to standard forms       │
-│    - Match against known property database  │
-└─────────────────────────────────────────────┘
-   ↓
-┌─────────────────────────────────────────────┐
-│ 8. Flagging Agent (GPT-5-mini)              │
-│    - Final quality assessment               │
-│    - Human review recommendations           │
-└─────────────────────────────────────────────┘
-   ↓
-Structured JSON Output
-```
-
-### Output Structure
+## Output Structure
 
 Each processed paper creates a dedicated folder:
 
@@ -495,9 +436,7 @@ Warning: Property standardization failed
 
 - [ ] **Web Interface**: Reimplement Flask UI for non-technical users
 - [ ] **Database Integration**: Direct export to PostgreSQL/MongoDB
-- [ ] **Enhanced Table Parsing**: Improved handling of multi-page and rotated tables
-- [ ] **Active Learning**: User feedback loop for property database expansion
-- [ ] **Multi-Language Support**: Extraction from non-English papers
+- [ ] **Scientific Figure Extraction**: Capture quantitative data from charts, graphs, and plots in scientific figures
 - [ ] **Domain Expansion**: Support for chemistry, biology, and physics papers
 
 ---

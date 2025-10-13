@@ -16,10 +16,10 @@
 
 - **Research-scale extraction**: Batch process entire folders of PDFs
 - **High accuracy**: Multi-agent architecture with iterative refinement (up to 3 extraction/evaluation cycles)
-- **Advanced PDF parsing**: Uses **Docling** for superior table extraction and structure preservation
+- **Advanced PDF parsing**: Uses **Docling** for superior text and table extraction, and structure preservation
 - **Two-stage validation**: Rule-based aggregation + LLM-based hallucination correction
-- **Property standardization**: Automatic mapping of property names to standard forms using GPT-5-mini
-- **Quality assurance**: Confidence scoring, flagging system, and human review guides
+- **Property standardization**: Automatic mapping of property names to standard forms
+- **Quality assurance**: Confidence scoring, flagging system for human review (if necessary), and human review guides
 - **ML-ready output**: Structured JSON format designed for database ingestion and machine learning
 
 ---
@@ -37,7 +37,7 @@
 - **Two-Stage Manager**:
   - **Stage 1 (Aggregation)**: Fast, rule-based merging of extraction runs
   - **Stage 2 (Validation)**: LLM-based hallucination detection and correction
-- **Flagging Agent**: Final quality assessment and review recommendations
+- **Flagging Agent**: Final quality assessment and human review recommendations (if necessary)
 
 ### 📊 **Comprehensive Data Extraction**
 - Material compositions (elements, stoichiometry, normalized formulas)
@@ -46,7 +46,7 @@
 - Material properties with ML-ready format:
   - Exact values, ranges, inequalities (>, <, ≥, ≤)
   - Numeric extraction with proper handling of qualitative properties
-  - Value types: exact, lower_bound, upper_bound, range, qualitative, missing
+  - Value types: exact, lower_bound, upper_bound, range, qualitative
 
 ### 🔬 **Property Standardization**
 - Automatic mapping of property names to standard forms using GPT-5-mini
@@ -55,7 +55,6 @@
 ### 🛡️ **Quality Assurance**
 - Confidence scoring for each extraction run
 - Hallucination detection using evaluation feedback
-- Safety checks for placeholder responses and lazy fallbacks
 - Flagging system for human review
 - Detailed rationales and review guides
 
@@ -163,7 +162,7 @@ python -m knowmat \
 | Argument | Description | Default |
 |----------|-------------|---------|
 | `--pdf-folder` | Path to folder containing PDFs (required) | - |
-| `--output-dir` | Directory for outputs | `./data/processed` |
+| `--output-dir` | Directory for outputs | - |
 | `--max-runs` | Maximum extraction/evaluation cycles | `3` |
 | `--subfield-model` | Model for subfield detection | `gpt-5-mini` |
 | `--extraction-model` | Model for data extraction | `gpt-5` |
@@ -181,10 +180,10 @@ result = run(
     output_dir="data/processed",
     max_runs=3,
     # Per-agent overrides:
+    subfield_model="gpt-5-mini",
     extraction_model="gpt-5",
     evaluation_model="gpt-5",
     manager_model="gpt-5",
-    subfield_model="gpt-5-mini",
     flagging_model="gpt-5-mini",
 )
 
@@ -299,7 +298,6 @@ KnowMat's unique two-stage manager architecture separates data merging from vali
   - No LLM calls (zero cost, zero latency)
   - Selects highest-confidence run as base
   - Merges additional compositions from other runs
-  - Deduplicates properties using (name, symbol) signatures
 
 **Stage 2 - Validation (LLM-Based)**:
 - Focused hallucination detection using evaluation feedback
@@ -311,18 +309,7 @@ KnowMat's unique two-stage manager architecture separates data merging from vali
 
 ### Property Standardization
 
-The PostProcessor uses GPT-5-mini to intelligently map extracted property names to standard forms:
-
-```python
-from knowmat.post_processing import PostProcessor
-
-processor = PostProcessor(
-    properties_file="configs/properties.json",
-    gpt_model="gpt-5-mini"
-)
-
-standardized = processor.standardize_properties(extracted_data)
-```
+The PostProcessor uses GPT-5-mini to intelligently map extracted property names to standard forms.
 
 **Example Mappings**:
 - "Dimensionless figure of merit ZT" → "thermoelectric figure of merit"
@@ -373,11 +360,11 @@ KnowMat supports per-agent model configuration, allowing you to balance cost and
 ### Recommended Configuration (Production)
 
 ```bash
---subfield-model gpt-5-mini      # Simple classification
---extraction-model gpt-5         # Complex structured extraction
---evaluation-model gpt-5         # Accuracy assessment
---manager-model gpt-5            # Hallucination correction
---flagging-model gpt-5-mini      # Final quality check
+--subfield-model gpt-5-mini      # Simple classification task - lightweight model sufficient
+--extraction-model gpt-5         # Complex structured extraction - needs advanced reasoning
+--evaluation-model gpt-5         # Critical accuracy assessment - requires deep understanding
+--manager-model gpt-5            # Hallucination detection/correction - needs strong reasoning
+--flagging-model gpt-5-mini      # Binary flagging decision - simple task
 ```
 
 **Cost per paper**: ~$0.75-1.30 (varies by paper length and complexity)
@@ -415,16 +402,7 @@ Error: Docling parsing failed
 ```
 **Solution**: Ensure PDF is not corrupted or password-protected. Try re-downloading the PDF.
 
-**3. Low Confidence Scores**
-```
-Warning: All runs flagged for review
-```
-**Solution**: 
-- Check if PDF contains actual data tables (not just images)
-- Verify the paper is a materials science paper
-- Use higher-quality models (GPT-5 instead of GPT-5-mini)
-
-**4. Property Standardization Failures**
+**3. Property Standardization Failures**
 ```
 Warning: Property standardization failed
 ```

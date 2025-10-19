@@ -23,6 +23,7 @@ output directory.
 import os
 import json
 import textwrap
+import uuid
 from typing import Optional
 
 from langgraph.graph import StateGraph, START, END
@@ -260,7 +261,9 @@ def run(
     }
 
     graph = build_graph()
-    thread_config = {"configurable": {"thread_id": "knowmat2_workflow"}}
+    # Use a unique thread ID for each paper to avoid context accumulation
+    thread_id = f"knowmat2_{base_name}_{uuid.uuid4().hex[:8]}"
+    thread_config = {"configurable": {"thread_id": thread_id}}
 
     # Execute the graph
     for _ in graph.stream(state, thread_config, stream_mode="values"):

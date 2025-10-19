@@ -62,9 +62,18 @@ def get_llm(agent_type: str = "default") -> ChatOpenAI:
     
     # GPT-5 models don't support temperature parameter
     if any(gpt5_variant in model for gpt5_variant in ["gpt-5", "gpt-5-mini", "gpt-5-nano"]):
-        return ChatOpenAI(model=model)
+        return ChatOpenAI(
+            model=model,
+            request_timeout=1200,  # 20 minute timeout per API call (not per pipeline)
+            max_retries=3,  # Retry failed requests up to 3 times
+        )
     else:
-        return ChatOpenAI(model=model, temperature=settings.temperature)
+        return ChatOpenAI(
+            model=model, 
+            temperature=settings.temperature,
+            request_timeout=1200,  # 20 minute timeout per API call (not per pipeline)
+            max_retries=3,
+        )
 
 
 class _LazyExtractor:

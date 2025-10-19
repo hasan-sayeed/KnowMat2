@@ -14,6 +14,9 @@ __pycache__/*
 */.ipynb_checkpoints/*
 .DS_Store
 
+# Environment variables (contains API keys - do not commit!)
+.env
+
 # Project files
 .ropeproject
 .project
